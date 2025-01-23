@@ -1,3 +1,5 @@
-README.md
+# Ignorar archivos del sistema
+.DS_Store
 
+#
 .gitignore
