@@ -11,7 +11,7 @@ import SwiftUI
 
 struct EventDesign1View :View {
     @StateObject var viewModel = EventsViewModel()
-    @State private var isPresentedDetailView = false
+    @State private var isPresentedCollection = false
     @State private var groupedType: GroupType = .none
     @State private var itemsType: GroupType = .none
     
@@ -55,7 +55,7 @@ struct EventDesign1View :View {
                                                             }
                                                         }
                                                     }
-                                                    
+                                                
                                             } placeholder: {
                                                 Text("Cargando imagen...")
                                                     .foregroundColor(.gray)
@@ -84,57 +84,58 @@ struct EventDesign1View :View {
                                 VStack(alignment: .leading) {
                                     NavigationLink("Ver comics") {
                                         
-                                            ItemsByEventScrollView(
-                                                viewModel: viewModel, 
-                                                itemsType: $itemsType,
-                                                groupedType: .comics
-                                            )
-                                                .navigationTitle("Comics")
+                                        ItemsByEventScrollView(
+                                            viewModel: viewModel,
+                                            itemsType: $itemsType,
+                                            groupedType: .comics
+                                        )
+                                        .navigationTitle("Comics")
                                         
                                     }
                                     RectangleItemScrollView(
                                         selectedItem: $viewModel.selectedComic,
-                                        isPresentedDetailView: $isPresentedDetailView, itemsType: $itemsType,
-                                        items: viewModel.comicsByEvent
+                                        isPresentedDetailView: $isPresentedCollection, itemsType: $itemsType,
+                                        items: viewModel.comicsByEvent,
+                                        isRectangle: true
                                     )
-                                    
-                                    
-                                    
                                     
                                     NavigationLink("Ver Personajes") {
                                         
                                     }
-                                    CircleItemScrollView(
+                                    RectangleItemScrollView(
+                                        selectedItem: $viewModel.selectedCharacter,
+                                        isPresentedDetailView: $isPresentedCollection,
+                                        itemsType: $itemsType,
                                         items: viewModel.charactersByEvent,
-                                        isPresentedDetailView: $isPresentedDetailView
+                                        isRectangle: false
                                     )
                                     
                                     
                                     NavigationLink("Ver series") {
                                         ItemsByEventScrollView(
-                                            viewModel: viewModel, 
+                                            viewModel: viewModel,
                                             itemsType: $itemsType,
                                             groupedType: .series
                                         )
-                                            .navigationTitle("Series")
+                                        .navigationTitle("Series")
                                     }
                                     RectangleItemScrollView(
                                         selectedItem: $viewModel.selectedSerie,
-                                        isPresentedDetailView: $isPresentedDetailView, 
+                                        isPresentedDetailView: $isPresentedCollection,
                                         itemsType: $itemsType,
-                                        items: viewModel.seriesByEvent
+                                        items: viewModel.seriesByEvent,
+                                        isRectangle: true
                                     )
                                 }
                             }
                         }
                     }
-                    .navigationDestination(isPresented: $isPresentedDetailView) {
+                    .navigationDestination(isPresented: $isPresentedCollection) {
                         
                         ItemSelectedDetailView(
                             viewModel: viewModel,
                             itemsType: $itemsType
                         )
-                        
                     }
                 }
                 .clipped()
@@ -142,135 +143,142 @@ struct EventDesign1View :View {
                 
             }
         }
-        
     }
 }
 
-struct CircleItemScrollView: View {
-    let items: [Character]
+
+
+struct RectangleItemScrollView<T: Identifiable>: View {
+    @Binding var selectedItem: T?
     @Binding var isPresentedDetailView: Bool
+    @Binding var itemsType: GroupType
+    var items: [T]
+    var isRectangle: Bool
+    
     
     var body: some View {
         ScrollView(.horizontal) {
             LazyHStack(alignment: .top, spacing: 10) {
                 ForEach(items) { item in
-                    VStack {
-                        ZStack {
-                            Circle()
-                                .foregroundStyle(.ultraThinMaterial)
-                                .frame(width: 120)
+                    Group {
+                        if let comic = item as? Comic {
                             
-                            let securePath = item.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                            if let imageUrl = URL(string: "\(securePath).\(item.thumbnailExtension)") {
-                                AsyncImage(url: imageUrl) { image in
-                                    image
-                                        .resizable()
-                                        .frame(width: 110, height: 110)
-                                        .scaledToFit()
-                                        .clipShape(Circle())
-                                } placeholder: {
-                                    ProgressView()
-                                }
-                            }
+                            let securePath = comic.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
+                            let safeUrlText = "\(securePath).\(comic.thumbnailExtension)"
+                            
+                            ImageAndTextView(
+                                text: comic.displayText,
+                                image: safeUrlText
+                            )
+                           
+                            
+                        } else if let serie = item as? Serie {
+                            
+                            let securePath = serie.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
+                            let safeUrlText = "\(securePath).\(serie.thumbnailExtension)"
+                            
+                            ImageAndTextView(
+                                text: serie.displayText,
+                                image: safeUrlText
+                            )
+                        } else if let character = item as? Character {
+                            let securePath = character.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
+                            let safeUrlText = "\(securePath).\(character.thumbnailExtension)"
+                            
+                            ImageAndTextView(
+                                text: character.displayText,
+                                image: safeUrlText,
+                                isRectangle: isRectangle
+                            )
                         }
-                        Text(item.displayText)
-                            .lineLimit(2)
-                            .frame(width: 120)
-                            .multilineTextAlignment(.center)
                     }
-                    .frame(width: 120)
                     .onTapGesture {
+                        selectedItem = item
+                        isPresentedDetailView = true
+                        
+                        if ((item as? Comic) != nil) {
+                            itemsType = .comics
+                        } else if ((selectedItem as? Character) != nil) {
+                            itemsType = .characters
+                        } else if ((selectedItem as? Serie) != nil) {
+                            itemsType = .series
+                        } else {
+                            itemsType = .none
+                        }
                         
                     }
                 }
-                .padding(.horizontal, 10)
-                .frame(height: 160)
             }
+            .padding(.horizontal, 10)
+            .frame(height: 240)
         }
     }
 }
-    
-    struct RectangleItemScrollView<T: Identifiable>: View {
-        @Binding var selectedItem: T?
-        @Binding var isPresentedDetailView: Bool
-        @Binding var itemsType: GroupType
-        var items: [T]
-        
-        
-        var body: some View {
-            ScrollView(.horizontal) {
-                LazyHStack(alignment: .top, spacing: 10) {
-                    ForEach(items) { item in
-                        VStack {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .foregroundStyle(.ultraThinMaterial)
-                                    .frame(width: 120, height: 160)
-                                
-                                Group {
-                                    if let comic = item as? Comic {
-                                        let securePath = comic.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                                        if let imageUrl = URL(string: "\(securePath).\(comic.thumbnailExtension)") {
-                                            AsyncImage(url: imageUrl) { image in
-                                                image
-                                                    .resizable()
-                                                    .frame(width: 110, height: 150)
-                                                    .scaledToFit()
-                                            } placeholder: {
-                                                ProgressView()
-                                            }
-                                        }
-                                    } else if let serie = item as? Serie {
-                                        let securePath = serie.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                                        if let imageUrl = URL(string: "\(securePath).\(serie.thumbnailExtension)") {
-                                            AsyncImage(url: imageUrl) { image in
-                                                image
-                                                    .resizable()
-                                                    .frame(width: 110, height: 150)
-                                                    .scaledToFit()
-                                            } placeholder: {
-                                                ProgressView()
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            Group {
-                                if let comic = item as? Comic {
-                                    Text(comic.title)
-                                        .lineLimit(2)
-                                        .frame(width: 120)
-                                        .multilineTextAlignment(.center)
-                                } else if let serie = item as? Serie {
-                                    Text(serie.title)
-                                        .lineLimit(2)
-                                        .frame(width: 120)
-                                        .multilineTextAlignment(.center)
-                                }
 
-                            }
-                                                    }
-                        .frame(width: 120)
-                        .onTapGesture {
-                            selectedItem = item
-                            isPresentedDetailView = true
-                            
-                            if ((item as? Comic) != nil) {
-                                itemsType = .comics
-                            } else if ((selectedItem as? Character) != nil) {
-                                itemsType = .characters
-                            } else if ((selectedItem as? Serie) != nil) {
-                                itemsType = .series
-                            } else {
-                                itemsType = .none
-                            }
-                            
+
+
+
+
+struct ImageAndTextView: View {
+    
+    var text: String
+    var image: String
+    var isRectangle: Bool
+    
+    init(text: String, image: String, isRectangle: Bool = true ) {
+        self.text = text
+        self.image = image
+        self.isRectangle = isRectangle
+    }
+    
+    var body: some View {
+        
+        VStack {
+            ZStack {
+                
+                if isRectangle {
+                    RoundedRectangle(cornerRadius: 10)
+                        .foregroundStyle(.ultraThinMaterial)
+                        .frame(width: 120, height: 160)
+                    
+                    if let imageUrl = URL(string: image) {
+                        AsyncImage(url: imageUrl) { image in
+                            image
+                                .resizable()
+                                .frame(width: 110, height: 150)
+                                .scaledToFit()
+                        } placeholder: {
+                            ProgressView()
                         }
                     }
+                } else {
+                    Circle()
+                        .foregroundStyle(.ultraThinMaterial)
+                        .frame(width: 120)
+                    
+                    if let imageUrl = URL(string: image) {
+                        AsyncImage(url: imageUrl) { image in
+                            image
+                                .resizable()
+                                .frame(width: 110, height: 110)
+                                .scaledToFit()
+                                .clipShape(Circle())
+                            
+                        } placeholder: {
+                            ProgressView()
+                        }
+                    }
+                    
                 }
-                .padding(.horizontal, 10)
-                .frame(height: 240)
+                
+                
+                
             }
+            Text(text)
+                .lineLimit(2)
+                .frame(width: 120)
+                .multilineTextAlignment(.center)
         }
+        .frame(width: 120, height: isRectangle ? 240 : 160)
     }
-
+}

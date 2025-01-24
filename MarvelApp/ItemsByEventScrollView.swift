@@ -10,7 +10,7 @@ import SwiftUI
 struct ItemsByEventScrollView: View {
     
         @ObservedObject var viewModel: EventsViewModel
-        @State private var isPresentedDetailView = false // Para almacenar la URL seleccionada
+        @State private var isPresentedDetailView = false 
         @Binding var itemsType: GroupType
         var groupedType: GroupType
     
