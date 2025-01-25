@@ -17,7 +17,6 @@ struct ItemSelectedDetailView: View {
             ScrollView {
                 VStack {
                     imageView()
-                    
                 }
             }
             .ignoresSafeArea(edges: [.top])
@@ -30,7 +29,11 @@ struct ItemSelectedDetailView: View {
             }
             
     }
-    
+    private func secureUrlText(path: String, typeImage: String) -> String {
+        let securePath = path.replacingOccurrences(of: "http://", with: "https://")
+        let safeUrlText = "\(securePath).\(typeImage)"
+        return safeUrlText
+    }
     @ViewBuilder
     func imageView() -> some View{
         
@@ -53,60 +56,80 @@ struct ItemSelectedDetailView: View {
                                     
                                     GeometryReader { geo in
                                         VStack {
-                                            ZStack {
-                                                
-                                                
+                                            
                                                 switch itemsType {
                                                     
                                                 case .comics:
-                                                    if let safeComic = viewModel.selectedComic {
-                                                        let securePath = safeComic.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                                                        if let imageUrl = URL(string: "\(securePath).\(safeComic.thumbnailExtension)") {
-                                                            AsyncImage(url: imageUrl) { image in
-                                                                
-                                                                image
-                                                                    .resizable()
-                                                                    .frame(width: 130, height: 170)
-                                                                    .scaledToFit()
-                                                                Rectangle().stroke(lineWidth: 4)
-                                                            } placeholder: {
-                                                                ProgressView()
+                                                    ZStack {
+                                                        if let safeComic = viewModel.selectedComic {
+                                                            
+                                                            let safeUrlText = secureUrlText(path: safeComic.thumbnailPath, typeImage: safeComic.thumbnailExtension)
+                                                           
+                                                            if let imageUrl = URL(string: safeUrlText) {
+                                                                AsyncImage(url: imageUrl) { image in
+                                                                    
+                                                                    image
+                                                                        .resizable()
+                                                                        .frame(width: 130, height: 170)
+                                                                        .scaledToFit()
+                                                                    Rectangle().stroke(lineWidth: 4)
+                                                                } placeholder: {
+                                                                    ProgressView()
+                                                                }
                                                             }
                                                         }
                                                     }
+                                                    .frame(width: 130, height: 170)
+                                                    .clipShape(Rectangle())
+                                                    
                                                     
                                                 case .characters:
-                                                    if let safeCharacter = viewModel.selectedCharacter {
-                                                        let securePath = safeCharacter.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                                                        if let imageUrl = URL(string: "\(securePath).\(safeCharacter.thumbnailExtension)") {
-                                                            AsyncImage(url: imageUrl) { image in
-                                                                
-                                                                image
-                                                                    .resizable()
-                                                                    .frame(width: 130, height: 170)
-                                                                    .scaledToFit()
-                                                                Rectangle().stroke(lineWidth: 4)
-                                                            } placeholder: {
-                                                                ProgressView()
+                                                    ZStack {
+                                                        if let safeCharacter = viewModel.selectedCharacter {
+                                                            
+                                                            let safeUrlText = secureUrlText(path: safeCharacter.thumbnailPath, typeImage: safeCharacter.thumbnailExtension)
+                                                           
+                                                            if let imageUrl = URL(string: safeUrlText) {
+                                                                AsyncImage(url: imageUrl) { image in
+                                                                    
+                                                                    image
+                                                                        .resizable()
+                                                                        .frame(width: 130, height: 170)
+                                                                        .scaledToFit()
+                                                                    Rectangle().stroke(lineWidth: 4)
+                                                                } placeholder: {
+                                                                    ProgressView()
+                                                                }
                                                             }
                                                         }
                                                     }
+                                                    .frame(width: 130, height: 170)
+                                                    .clipShape(Rectangle())
                                                 case .series:
-                                                    if let safeSerie = viewModel.selectedSerie {
-                                                        let securePath = safeSerie.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                                                        if let imageUrl = URL(string: "\(securePath).\(safeSerie.thumbnailExtension)") {
-                                                            AsyncImage(url: imageUrl) { image in
-                                                                
-                                                                image
-                                                                    .resizable()
-                                                                    .frame(width: 130, height: 170)
-                                                                    .scaledToFit()
-                                                                Rectangle().stroke(lineWidth: 4)
-                                                            } placeholder: {
-                                                                ProgressView()
+                                                  
+                                                    ZStack {
+                                                        if let safeSerie = viewModel.selectedSerie {
+                                                            
+                                                            let safeUrlText = secureUrlText(path: safeSerie.thumbnailPath, typeImage: safeSerie.thumbnailExtension)
+                                                           
+                                                            if let imageUrl = URL(string: safeUrlText) {
+                                                                AsyncImage(url: imageUrl) { image in
+                                                                    
+                                                                    image
+                                                                        .resizable()
+                                                                        .frame(width: 130, height: 170)
+                                                                        .scaledToFit()
+                                                                    Rectangle().stroke(lineWidth: 4)
+                                                                } placeholder: {
+                                                                    ProgressView()
+                                                                }
                                                             }
                                                         }
                                                     }
+                                                    .frame(width: 130, height: 170)
+                                                    .clipShape(Rectangle())
+                                                    
+                                                    
                                                 case .none:
                                                     EmptyView()
                                                     
@@ -115,9 +138,7 @@ struct ItemSelectedDetailView: View {
                                                 
                                                 
                                                 
-                                            }
-                                            .frame(width: 130, height: 170)
-                                            .clipShape(Rectangle())
+                                            
                                             switch itemsType {
                                                 
                                             case .comics:
@@ -129,6 +150,7 @@ struct ItemSelectedDetailView: View {
                                                         .lineLimit(3)
                                                         .frame(width: 220)
                                                         .multilineTextAlignment(.center)
+                                                        
                                                 }
                                                 
                                                 
@@ -140,6 +162,7 @@ struct ItemSelectedDetailView: View {
                                                         .lineLimit(3)
                                                         .frame(width: 220)
                                                         .multilineTextAlignment(.center)
+                                                        
                                                 }
                                                 
                                                 
@@ -161,7 +184,7 @@ struct ItemSelectedDetailView: View {
                                             
                                         }
                                         .frame(maxWidth: .infinity)
-                                        .frame(height: 250)
+                                        .frame(height: 300)
                                         .offset(y: geo.size.height - 85)
                                         .offset(y: isScrolling ? -minY : 0)
                                     }
@@ -172,7 +195,7 @@ struct ItemSelectedDetailView: View {
                                 .foregroundColor(.gray)
                         }
                     }
-                    .frame(height: 300)
+                    
                 }
         }
         

@@ -33,6 +33,12 @@ struct ItemsByEventScrollView: View {
                     
             }
         }
+    
+    private func secureUrlText(path: String, typeImage: String) -> String {
+        let securePath = path.replacingOccurrences(of: "http://", with: "https://")
+        let safeUrlText = "\(securePath).\(typeImage)"
+        return safeUrlText
+    }
 
         var GridView: some View {
             LazyVGrid(columns: Array(repeating: GridItem(), count: 2)) {
@@ -41,34 +47,19 @@ struct ItemsByEventScrollView: View {
                 case .comics:
                     ForEach(viewModel.comicsByEvent, id: \.id) { comic in
                         ZStack(alignment: .top) {
-                            RoundedRectangle(cornerRadius: 20)
-                                .frame(width: 180, height: 220)
-                                .foregroundStyle(.ultraThinMaterial)
                             
-                            let securePath = comic.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                            if let imageUrl = URL(string: "\(securePath).\(comic.thumbnailExtension)") {
-                                AsyncImage(url: imageUrl) { image in
-                                    VStack {
-                                        image
-                                            .resizable()
-                                            .frame(width: 120, height: 160)
-                                            .aspectRatio(contentMode: .fit)
-                                        Text(comic.displayText)
-                                            .lineLimit(2)
-                                            .frame(width: 160)
-                                            .multilineTextAlignment(.center)
-                                    }
-                                } placeholder: {
-                                    ProgressView()
-                                }
-                                .frame(width: 170, height: 210)
+                            let safeUrlText = secureUrlText(path: comic.thumbnailPath, typeImage: comic.thumbnailExtension)
+                             
+                            ImageAndTextView(text: comic.displayText, image: safeUrlText)
                                 .onTapGesture {
                                     
                                     viewModel.selectedComic = comic
+                                    viewModel.selectedCharacter = nil
+                                    viewModel.selectedSerie = nil
                                     isPresentedDetailView = true
                                     itemsType = .comics
                                 }
-                            }
+                            
                         }
                         .frame(width: 180, height: 220)
                     }
@@ -76,34 +67,17 @@ struct ItemsByEventScrollView: View {
                 case .characters:
                     ForEach(viewModel.charactersByEvent, id: \.id) { character in
                         ZStack(alignment: .top) {
-                            RoundedRectangle(cornerRadius: 20)
-                                .frame(width: 180, height: 220)
-                                .foregroundStyle(.ultraThinMaterial)
-                            
-                            let securePath = character.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                            if let imageUrl = URL(string: "\(securePath).\(character.thumbnailExtension)") {
-                                AsyncImage(url: imageUrl) { image in
-                                    VStack {
-                                        image
-                                            .resizable()
-                                            .frame(width: 120, height: 160)
-                                            .aspectRatio(contentMode: .fit)
-                                        Text(character.displayText)
-                                            .lineLimit(2)
-                                            .frame(width: 160)
-                                            .multilineTextAlignment(.center)
-                                    }
-                                } placeholder: {
-                                    ProgressView()
-                                }
-                                .frame(width: 170, height: 210)
+                            let safeUrlText = secureUrlText(path: character.thumbnailPath, typeImage: character.thumbnailExtension)
+                             
+                            ImageAndTextView(text: character.displayText, image: safeUrlText)
                                 .onTapGesture {
                                     
+                                    viewModel.selectedComic = nil
                                     viewModel.selectedCharacter = character
+                                    viewModel.selectedSerie = nil
                                     isPresentedDetailView = true
                                     itemsType = .characters
                                 }
-                            }
                         }
                         .frame(width: 180, height: 220)
                     }
@@ -111,35 +85,19 @@ struct ItemsByEventScrollView: View {
                 case .series:
                     ForEach(viewModel.seriesByEvent, id: \.id) { serie in
                         ZStack(alignment: .top) {
-                            RoundedRectangle(cornerRadius: 20)
-                                .frame(width: 180, height: 220)
-                                .foregroundStyle(.ultraThinMaterial)
                             
-                            let securePath = serie.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                            if let imageUrl = URL(string: "\(securePath).\(serie.thumbnailExtension)") {
-                                AsyncImage(url: imageUrl) { image in
-                                    VStack {
-                                        image
-                                            .resizable()
-                                            .frame(width: 120, height: 160)
-                                            .aspectRatio(contentMode: .fit)
-                                        Text(serie.displayText)
-                                            .lineLimit(2)
-                                            .frame(width: 160)
-                                            .multilineTextAlignment(.center)
-                                    }
-                                } placeholder: {
-                                    ProgressView()
-                                }
-                                .frame(width: 170, height: 210)
+                            let safeUrlText = secureUrlText(path: serie.thumbnailPath, typeImage: serie.thumbnailExtension)
+                             
+                            ImageAndTextView(text: serie.displayText, image: safeUrlText)
                                 .onTapGesture {
                                     
+                                    viewModel.selectedComic = nil
+                                    viewModel.selectedCharacter = nil
                                     viewModel.selectedSerie = serie
                                     isPresentedDetailView = true
                                     itemsType = .series
-                                   
                                 }
-                            }
+                            
                         }
                         .frame(width: 180, height: 220)
                     }

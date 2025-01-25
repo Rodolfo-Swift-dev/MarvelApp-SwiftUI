@@ -92,7 +92,7 @@ struct EventDesign1View :View {
                                         .navigationTitle("Comics")
                                         
                                     }
-                                    RectangleItemScrollView(
+                                    GenericItemScrollView(
                                         selectedItem: $viewModel.selectedComic,
                                         isPresentedDetailView: $isPresentedCollection, itemsType: $itemsType,
                                         items: viewModel.comicsByEvent,
@@ -102,7 +102,7 @@ struct EventDesign1View :View {
                                     NavigationLink("Ver Personajes") {
                                         
                                     }
-                                    RectangleItemScrollView(
+                                    GenericItemScrollView(
                                         selectedItem: $viewModel.selectedCharacter,
                                         isPresentedDetailView: $isPresentedCollection,
                                         itemsType: $itemsType,
@@ -119,7 +119,7 @@ struct EventDesign1View :View {
                                         )
                                         .navigationTitle("Series")
                                     }
-                                    RectangleItemScrollView(
+                                    GenericItemScrollView(
                                         selectedItem: $viewModel.selectedSerie,
                                         isPresentedDetailView: $isPresentedCollection,
                                         itemsType: $itemsType,
@@ -139,7 +139,7 @@ struct EventDesign1View :View {
                     }
                 }
                 .clipped()
-                .navigationTitle("Evento")
+                .navigationTitle("Eventos Marvel")
                 
             }
         }
@@ -148,7 +148,7 @@ struct EventDesign1View :View {
 
 
 
-struct RectangleItemScrollView<T: Identifiable>: View {
+struct GenericItemScrollView<T: Identifiable>: View {
     @Binding var selectedItem: T?
     @Binding var isPresentedDetailView: Bool
     @Binding var itemsType: GroupType
@@ -160,11 +160,11 @@ struct RectangleItemScrollView<T: Identifiable>: View {
         ScrollView(.horizontal) {
             LazyHStack(alignment: .top, spacing: 10) {
                 ForEach(items) { item in
+                    
                     Group {
                         if let comic = item as? Comic {
                             
-                            let securePath = comic.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                            let safeUrlText = "\(securePath).\(comic.thumbnailExtension)"
+                            let safeUrlText = secureUrlText(path: comic.thumbnailPath, typeImage: comic.thumbnailExtension)
                             
                             ImageAndTextView(
                                 text: comic.displayText,
@@ -174,16 +174,15 @@ struct RectangleItemScrollView<T: Identifiable>: View {
                             
                         } else if let serie = item as? Serie {
                             
-                            let securePath = serie.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                            let safeUrlText = "\(securePath).\(serie.thumbnailExtension)"
+                            let safeUrlText = secureUrlText(path: serie.thumbnailPath, typeImage: serie.thumbnailExtension)
                             
                             ImageAndTextView(
                                 text: serie.displayText,
                                 image: safeUrlText
                             )
                         } else if let character = item as? Character {
-                            let securePath = character.thumbnailPath.replacingOccurrences(of: "http://", with: "https://")
-                            let safeUrlText = "\(securePath).\(character.thumbnailExtension)"
+                            
+                            let safeUrlText = secureUrlText(path: character.thumbnailPath, typeImage: character.thumbnailExtension)
                             
                             ImageAndTextView(
                                 text: character.displayText,
@@ -212,6 +211,12 @@ struct RectangleItemScrollView<T: Identifiable>: View {
             .padding(.horizontal, 10)
             .frame(height: 240)
         }
+    }
+    
+    private func secureUrlText(path: String, typeImage: String) -> String {
+        let securePath = path.replacingOccurrences(of: "http://", with: "https://")
+        let safeUrlText = "\(securePath).\(typeImage)"
+        return safeUrlText
     }
 }
 
@@ -268,11 +273,7 @@ struct ImageAndTextView: View {
                             ProgressView()
                         }
                     }
-                    
                 }
-                
-                
-                
             }
             Text(text)
                 .lineLimit(2)
